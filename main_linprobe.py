@@ -25,7 +25,7 @@ import torchvision.datasets as datasets
 
 import timm
 
-assert timm.__version__ == "0.3.2" # version check
+# assert timm.__version__ == "0.3.2" # version check
 from timm.models.layers import trunc_normal_
 
 import util.misc as misc
@@ -44,12 +44,17 @@ def get_args_parser():
     parser.add_argument('--batch_size', default=512, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
     parser.add_argument('--epochs', default=90, type=int)
+    parser.add_argument('--ckpt_interval', default=100, type=int,
+                        help='The interval (in epochs) to save a checkpoint')
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
     # Model parameters
     parser.add_argument('--model', default='vit_large_patch16', type=str, metavar='MODEL',
                         help='Name of model to train')
+    parser.add_argument('--no_k_bias_in_vit', action='store_true', dest='no_k_bias_in_vit',
+                        help="Use a variant of ViT without k_bias in ViT self-attention (as in BEiT)")
+    parser.set_defaults(no_k_bias_in_vit=False)
 
     # Optimizer parameters
     parser.add_argument('--weight_decay', type=float, default=0,
@@ -187,6 +192,7 @@ def main(args):
     )
 
     model = models_vit.__dict__[args.model](
+        args=args,
         num_classes=args.nb_classes,
         global_pool=args.global_pool,
     )
@@ -277,7 +283,7 @@ def main(args):
             log_writer=log_writer,
             args=args
         )
-        if args.output_dir:
+        if args.output_dir and (epoch % args.ckpt_interval == 0 or epoch + 1 == args.epochs):
             misc.save_model(
                 args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                 loss_scaler=loss_scaler, epoch=epoch)

@@ -23,7 +23,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import timm
 
-assert timm.__version__ == "0.3.2" # version check
+# assert timm.__version__ == "0.3.2" # version check
 from timm.models.layers import trunc_normal_
 from timm.data.mixup import Mixup
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
@@ -44,12 +44,17 @@ def get_args_parser():
     parser.add_argument('--batch_size', default=64, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
     parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--ckpt_interval', default=100, type=int,
+                        help='The interval (in epochs) to save a checkpoint')
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
     # Model parameters
     parser.add_argument('--model', default='vit_large_patch16', type=str, metavar='MODEL',
                         help='Name of model to train')
+    parser.add_argument('--no_k_bias_in_vit', action='store_true', dest='no_k_bias_in_vit',
+                        help="Use a variant of ViT without k_bias in ViT self-attention (as in BEiT)")
+    parser.set_defaults(no_k_bias_in_vit=False)
 
     parser.add_argument('--input_size', default=224, type=int,
                         help='images input size')
@@ -225,6 +230,7 @@ def main(args):
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
     
     model = models_vit.__dict__[args.model](
+        args=args,
         num_classes=args.nb_classes,
         drop_path_rate=args.drop_path,
         global_pool=args.global_pool,
@@ -317,7 +323,7 @@ def main(args):
             log_writer=log_writer,
             args=args
         )
-        if args.output_dir:
+        if args.output_dir and (epoch % args.ckpt_interval == 0 or epoch + 1 == args.epochs):
             misc.save_model(
                 args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                 loss_scaler=loss_scaler, epoch=epoch)

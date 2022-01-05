@@ -1,155 +1,53 @@
-## Masked Autoencoders: A PyTorch Implementation
+## Exploring Long-Sequence Masked Autoencoders
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/11435359/146857310-f258c86c-fde6-48e8-9cee-badd2b21bd2c.png" width="480">
-</p>
-
-
-This is a PyTorch/GPU re-implementation of the paper [Masked Autoencoders Are Scalable Vision Learners](https://arxiv.org/abs/2111.06377):
+This is the code release of the paper [Exploring Long-Sequence Masked Autoencoders](https://arxiv.org/abs/2210.07224):
 ```
-@Article{MaskedAutoencoders2021,
-  author  = {Kaiming He and Xinlei Chen and Saining Xie and Yanghao Li and Piotr Doll{\'a}r and Ross Girshick},
-  journal = {arXiv:2111.06377},
-  title   = {Masked Autoencoders Are Scalable Vision Learners},
-  year    = {2021},
+@Article{hu2022exploring,
+  author  = {Ronghang Hu and Shoubhik Debnath and Saining Xie and Xinlei Chen},
+  journal = {arXiv:2210.07224},
+  title   = {Exploring Long-Sequence Masked Autoencoders},
+  year    = {2022},
 }
 ```
 
-* The original implementation was in TensorFlow+TPU. This re-implementation is in PyTorch+GPU.
+* This repo is a modification on the [MAE repo](https://github.com/facebookresearch/mae), and supports long-sequence pretraining on both GPUs and TPUs using PyTorch.
 
-* This repo is a modification on the [DeiT repo](https://github.com/facebookresearch/deit). Installation and preparation follow that repo.
-
-* This repo is based on [`timm==0.3.2`](https://github.com/rwightman/pytorch-image-models), for which a [fix](https://github.com/rwightman/pytorch-image-models/issues/420#issuecomment-776459842) is needed to work with PyTorch 1.8.1+.
-
-### Catalog
-
-- [x] Visualization demo
-- [x] Pre-trained checkpoints + fine-tuning code
-- [x] Pre-training code
-
-### Visualization demo
-
-Run our interactive visualization demo using [Colab notebook](https://colab.research.google.com/github/facebookresearch/mae/blob/main/demo/mae_visualize.ipynb) (no GPU needed):
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/11435359/147859292-77341c70-2ed8-4703-b153-f505dcb6f2f8.png" width="600">
-</p>
+* This repo is based on [`timm==0.4.12`](https://github.com/rwightman/pytorch-image-models), which can be installed via `pip3 install timm==0.4.12`.
 
 ### Fine-tuning with pre-trained checkpoints
 
-The following table provides the pre-trained checkpoints used in the paper, converted from TF/TPU to PT/GPU:
+The following table provides the pre-trained checkpoints used in the paper:
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
-<th valign="bottom"></th>
+<th valign="bottom">Model (pretrained w/ L=784, image size 448, patch size 16)</th>
 <th valign="bottom">ViT-Base</th>
 <th valign="bottom">ViT-Large</th>
-<th valign="bottom">ViT-Huge</th>
 <!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
-<td align="center"><a href="https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth">download</a></td>
-<td align="center"><a href="https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_large.pth">download</a></td>
-<td align="center"><a href="https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_huge.pth">download</a></td>
-</tr>
-<tr><td align="left">md5</td>
-<td align="center"><tt>8cad7c</tt></td>
-<td align="center"><tt>b8b06e</tt></td>
-<td align="center"><tt>9bdbb0</tt></td>
-</tr>
-</tbody></table>
-
-The fine-tuning instruction is in [FINETUNE.md](FINETUNE.md).
-
-By fine-tuning these pre-trained models, we rank #1 in these classification tasks (detailed in the paper):
-<table><tbody>
-<!-- START TABLE -->
-<!-- TABLE HEADER -->
-<th valign="bottom"></th>
-<th valign="bottom">ViT-B</th>
-<th valign="bottom">ViT-L</th>
-<th valign="bottom">ViT-H</th>
-<th valign="bottom">ViT-H<sub>448</sub></th>
-<td valign="bottom" style="color:#C0C0C0">prev best</td>
-<!-- TABLE BODY -->
-<tr><td align="left">ImageNet-1K (no external data)</td>
-<td align="center">83.6</td>
-<td align="center">85.9</td>
-<td align="center">86.9</td>
-<td align="center"><b>87.8</b></td>
-<td align="center" style="color:#C0C0C0">87.1</td>
-</tr>
-<td colspan="5"><font size="1"><em>following are evaluation of the same model weights (fine-tuned in original ImageNet-1K):</em></font></td>
 <tr>
+<td align="left">COCO (train2017 + unlabeled2017) 4000-epoch</td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/coco%2Bunlabeled_dup5/vitb_dec384d12h8b_800ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/coco%2Bunlabeled_dup5/vitl_dec512d16h8b_800ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
 </tr>
-<tr><td align="left">ImageNet-Corruption (error rate) </td>
-<td align="center">51.7</td>
-<td align="center">41.8</td>
-<td align="center"><b>33.8</b></td>
-<td align="center">36.8</td>
-<td align="center" style="color:#C0C0C0">42.5</td>
+<tr>
+<td align="left">ImageNet-1k 800-epoch</td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/in1k/vitb_dec384d12h8b_800ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/in1k/vitl_dec512d16h8b_800ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
 </tr>
-<tr><td align="left">ImageNet-Adversarial</td>
-<td align="center">35.9</td>
-<td align="center">57.1</td>
-<td align="center">68.2</td>
-<td align="center"><b>76.7</b></td>
-<td align="center" style="color:#C0C0C0">35.8</td>
-</tr>
-<tr><td align="left">ImageNet-Rendition</td>
-<td align="center">48.3</td>
-<td align="center">59.9</td>
-<td align="center">64.4</td>
-<td align="center"><b>66.5</b></td>
-<td align="center" style="color:#C0C0C0">48.7</td>
-</tr>
-<tr><td align="left">ImageNet-Sketch</td>
-<td align="center">34.5</td>
-<td align="center">45.3</td>
-<td align="center">49.6</td>
-<td align="center"><b>50.9</b></td>
-<td align="center" style="color:#C0C0C0">36.0</td>
-</tr>
-<td colspan="5"><font size="1"><em>following are transfer learning by fine-tuning the pre-trained MAE on the target dataset:</em></font></td>
-</tr>
-<tr><td align="left">iNaturalists 2017</td>
-<td align="center">70.5</td>
-<td align="center">75.7</td>
-<td align="center">79.3</td>
-<td align="center"><b>83.4</b></td>
-<td align="center" style="color:#C0C0C0">75.4</td>
-</tr>
-<tr><td align="left">iNaturalists 2018</td>
-<td align="center">75.4</td>
-<td align="center">80.1</td>
-<td align="center">83.0</td>
-<td align="center"><b>86.8</b></td>
-<td align="center" style="color:#C0C0C0">81.2</td>
-</tr>
-<tr><td align="left">iNaturalists 2019</td>
-<td align="center">80.5</td>
-<td align="center">83.4</td>
-<td align="center">85.7</td>
-<td align="center"><b>88.3</b></td>
-<td align="center" style="color:#C0C0C0">84.1</td>
-</tr>
-<tr><td align="left">Places205</td>
-<td align="center">63.9</td>
-<td align="center">65.8</td>
-<td align="center">65.9</td>
-<td align="center"><b>66.8</b></td>
-<td align="center" style="color:#C0C0C0">66.0</td>
-</tr>
-<tr><td align="left">Places365</td>
-<td align="center">57.9</td>
-<td align="center">59.4</td>
-<td align="center">59.8</td>
-<td align="center"><b>60.3</b></td>
-<td align="center" style="color:#C0C0C0">58.0</td>
+<tr>
+<td align="left">ImageNet-1k 1600-epoch</td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/in1k/vitb_dec384d12h8b_1600ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
+<td align="center"><a href="https://dl.fbaipublicfiles.com/long_seq_mae/pretrained_models/in1k/vitl_dec512d16h8b_1600ep_img448_crop0.2-1.0_maskds2.pth">download</a></td>
 </tr>
 </tbody></table>
 
-### Pre-training
+### Using the codebase
 
-The pre-training instruction is in [PRETRAIN.md](PRETRAIN.md).
+* Follow [`PRETRAIN_LONG_SEQ_TPU.md`](PRETRAIN_LONG_SEQ_TPU.md) for long-sequence pretraining on Google Cloud TPUs (which we used for our experiments).
+* Follow [`PRETRAIN_LONG_SEQ_GPU.md`](PRETRAIN_LONG_SEQ_GPU.md) for long-sequence pretraining on Nvidia GPUs.
+* Follow [`FINETUNE_DETECTION.md`](FINETUNE_DETECTION.md) to fine-tune on the object detection task using the ViTDet codebase from Detectron2.
+
+In addition, this codebase is also compatible with the features in the original MAE repo. Follow [`README_MAE.md`](README_MAE.md) to use the features of the original MAE repo (such as fine-tuning on image classification).
 
 ### License
 
